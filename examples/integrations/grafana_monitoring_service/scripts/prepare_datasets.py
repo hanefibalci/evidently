@@ -51,7 +51,9 @@ def main(dataset_name: str, dataset_path: str) -> None:
     dataset_path = os.path.abspath(dataset_path)
     logging.info("Maine girdik")
  #   if os.path.exists(dataset_path):
-#        logging.info("Path %s already exists, remove it", dataset_path)
+
+
+###         logging.info("Path %s already exists, remove it", dataset_path)
     #    shutil.rmtree(dataset_path)
 
     #os.makedirs(dataset_path)
