@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+#hanefi balcı
 import argparse
 import io
 import logging
@@ -24,86 +24,37 @@ def setup_logger() -> None:
     )
 
 
-def get_data_bike_random_forest() -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Get bike dataset with random forest model prediction"""
-    return get_data_bike(True)
-
-
-def get_data_bike_gradient_boosting() -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Get bike dataset with gradient boosting model"""
-    return get_data_bike(False)
-
-
-def get_data_bike(use_model: bool) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    content = requests.get(BIKE_DATA_SOURCE_URL).content
-
-    with zipfile.ZipFile(io.BytesIO(content)) as arc:
-        with arc.open("day.csv") as datafile:
-            raw_data = pd.read_csv(datafile, header=0, sep=",", parse_dates=["dteday"])
-
-    reference_bike_data = raw_data[:120]
-    production_bike_data = raw_data[120:]
-
-    target = "cnt"
-    numerical_features = ["mnth", "temp", "atemp", "hum", "windspeed"]
-    categorical_features = ["season", "holiday", "weekday", "workingday", "weathersit"]
-
-    features = numerical_features + categorical_features
-
-    if use_model:
-        from sklearn.ensemble import RandomForestRegressor
-
-        # get predictions with random forest
-        model = RandomForestRegressor(random_state=0)
-
-    else:
-        from sklearn.ensemble import GradientBoostingRegressor
-
-        model = GradientBoostingRegressor(random_state=0)
-
-    model.fit(reference_bike_data[features], reference_bike_data[target])
-    reference_bike_data["prediction"] = model.predict(reference_bike_data[features])
-    production_bike_data["prediction"] = model.predict(production_bike_data[features])
-
-    return reference_bike_data, production_bike_data
-
-
-def get_data_kdd_classification() -> Tuple[pd.DataFrame, pd.DataFrame]:
+def get_data_telco_churn() -> Tuple[pd.DataFrame, pd.DataFrame]:
     from sklearn import model_selection
     from sklearn import neighbors
+    print("telco metoduna girdi")
 
-    # local import for make other cases faster
-    from sklearn.datasets import fetch_kddcup99
-
-    data = fetch_kddcup99(as_frame=True)
-    features = list(set(data.feature_names) - {"protocol_type", "service", "flag"})
-    reference_kdd_data, production_kdd_data = model_selection.train_test_split(
-        data.frame, random_state=0, train_size=0.2, test_size=0.1
+    data = pd.read_csv("telco_churn.csv")
+    features = list(set(data.columns) - {"Churn"})
+    
+    reference_data, production_data = model_selection.train_test_split(
+        data, random_state=0, train_size=0.2, test_size=0.1
     )
-    target = data.target_names[0]
-    reference_kdd_data.reset_index(inplace=True, drop=True)
-    reference_kdd_data[target] = reference_kdd_data[target].apply(lambda x: x.decode("utf8"))
-    production_kdd_data.reset_index(inplace=True, drop=True)
-    production_kdd_data[target] = production_kdd_data[target].apply(lambda x: x.decode("utf8"))
+    target = "Churn"
 
     classification_model = neighbors.KNeighborsClassifier(n_neighbors=1)
-    classification_model.fit(reference_kdd_data[features], reference_kdd_data[target])
+    classification_model.fit(reference_data[features], reference_data[target])
 
-    reference_kdd_data["prediction"] = classification_model.predict(reference_kdd_data[features])
-    production_kdd_data["prediction"] = classification_model.predict(production_kdd_data[features])
-
-    return reference_kdd_data[features + [target, "prediction"]], production_kdd_data
+    reference_data["prediction"] = classification_model.predict(reference_data[features])
+    production_data["prediction"] = classification_model.predict(production_data[features])
+    print("tahminler yapıldı")
+    return reference_data[features + [target, "prediction"]], production_data
 
 
 def main(dataset_name: str, dataset_path: str) -> None:
     logging.info("Generate test data for dataset %s", dataset_name)
     dataset_path = os.path.abspath(dataset_path)
+    logging.info("Maine girdik")
+ #   if os.path.exists(dataset_path):
+#        logging.info("Path %s already exists, remove it", dataset_path)
+    #    shutil.rmtree(dataset_path)
 
-    if os.path.exists(dataset_path):
-        logging.info("Path %s already exists, remove it", dataset_path)
-        shutil.rmtree(dataset_path)
-
-    os.makedirs(dataset_path)
+    #os.makedirs(dataset_path)
 
     reference_data, production_data = DATA_SOURCES[dataset_name]()
     logging.info("Save datasets to %s", dataset_path)
@@ -115,9 +66,7 @@ def main(dataset_name: str, dataset_path: str) -> None:
 
 
 DATA_SOURCES = {
-    "bike_random_forest": get_data_bike_random_forest,
-    "bike_gradient_boosting": get_data_bike_gradient_boosting,
-    "kdd_k_neighbors_classifier": get_data_kdd_classification,
+    "telco_churn": get_data_telco_churn,
 }
 
 

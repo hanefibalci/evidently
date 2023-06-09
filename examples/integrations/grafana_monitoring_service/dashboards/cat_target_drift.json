@@ -211,8 +211,8 @@
       {
         "current": {
           "selected": false,
-          "text": "kdd_k_neighbors_classifier",
-          "value": "kdd_k_neighbors_classifier"
+          "text": "telco_churn",
+          "value": "telco_churn"
         },
         "datasource": {
           "type": "prometheus",

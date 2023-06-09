@@ -33,7 +33,7 @@ def check_dataset(
 ) -> None:
     logging.info("Check dataset %s", dataset_name)
     dataset_path = os.path.join(datasets_path, dataset_name)
-
+    logging.info("dataset path bu :"+ dataset_path)
     if os.path.exists(dataset_path):
         if force:
             logging.info("Remove dataset directory %s", dataset_path)
@@ -59,8 +59,7 @@ def download_test_datasets(force: bool):
     else:
         logging.info("Datasets directory already exists")
 
-    for dataset_name in ("bike_random_forest", "bike_gradient_boosting", "kdd_k_neighbors_classifier"):
-        check_dataset(force, datasets_path, dataset_name)
+    check_dataset(force, datasets_path, "reference.csv")
 
 
 def run_docker_compose():
