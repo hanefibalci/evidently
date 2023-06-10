@@ -27,7 +27,7 @@ class NumpyEncoder(json.JSONEncoder):
 
 
 def send_data_row(dataset_name: str, data: Dict) -> None:
-    print(f"sseeeend a data item for {dataset_name}")
+    print(f"Send a data item for {dataset_name}")
 
     try:
         response = requests.post(
@@ -60,22 +60,23 @@ def main(sleep_timeout: int) -> None:
     datasets = {}
     max_index = 0
 
-    for dataset_name in os.listdir(datasets_path):
-        production_data_path = os.path.join(datasets_path, dataset_name, "production.csv")
-        new_data = pd.read_csv(production_data_path)
-        print("data seti okudu")
-        datasets[dataset_name] = new_data
-        print(new_data.sample())
-        max_index = max(max_index, new_data.shape[0])
 
-    for idx in range(0, max_index):
-        for dataset_name, dataset in datasets.items():
-            dataset_size = dataset.shape[0]
-            data = dataset.iloc[idx % dataset_size].to_dict()
-            send_data_row(dataset_name, data)
+    df_ref = pd.read_csv(datasets_path+"/reference.csv")
+    df_prod = pd.read_csv(datasets_path+"/production.csv")
 
-        print(f"Wait {sleep_timeout} seconds till the next try.")
-        time.sleep(sleep_timeout)
+    for i in range(df_ref.shape[0]):
+        data = df_ref.iloc[i].to_dict()
+        print(data)
+        send_data_row("reference", data)
+        time.sleep(0.1)
+
+    for i in range(df_prod.shape[0]):
+        data = df_prod.iloc[i].to_dict()
+        send_data_row("production", data)
+        time.sleep(0.1)
+    
+
+
 
 
 if __name__ == "__main__":

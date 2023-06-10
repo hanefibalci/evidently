@@ -32,6 +32,7 @@ def check_dataset(
     dataset_name: str
 ) -> None:
     logging.info("Check dataset %s", dataset_name)
+    logging.info("dataset path bu :"+ datasets_path)
     dataset_path = os.path.join(datasets_path, dataset_name)
     logging.info("dataset path bu :"+ dataset_path)
     if os.path.exists(dataset_path):
@@ -45,7 +46,7 @@ def check_dataset(
             return
 
     logging.info("Download dataset %s", dataset_name)
-    run_script(cmd=["scripts/prepare_datasets.py", "-d", dataset_name, "-p", dataset_path], wait=True)
+    run_script(cmd=["python3 scripts/prepare_datasets.py", "-d", dataset_name, "-p", dataset_path], wait=True)
 
 
 def download_test_datasets(force: bool):
@@ -59,7 +60,7 @@ def download_test_datasets(force: bool):
     else:
         logging.info("Datasets directory already exists")
 
-    check_dataset(force, datasets_path, "reference.csv")
+    check_dataset(force, datasets_path, "telco_churn.csv")
 
 
 def run_docker_compose():
@@ -79,7 +80,7 @@ def run_script(cmd: list, wait: bool) -> None:
 
 
 def send_data_requests():
-    os.system("scripts/example_run_request.py")
+    os.system("python3 scripts/example_run_request.py")
 
 
 def stop_docker_compose():
